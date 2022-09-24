@@ -30,4 +30,4 @@ jobs:
         prerelease: false
         title: "latest build"
         files: |
-          *.jar
+          build/libs/${{ github.event.repository.name }}.jar
