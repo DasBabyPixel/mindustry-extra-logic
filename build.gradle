@@ -6,7 +6,7 @@ targetCompatibility = 8
 sourceCompatibility = 8
 
 sourceSets.main.java.srcDirs = ["src/main/java"]
-sourceSets.main.resources.srcDirs = ["src/main/resources"]
+sourceSets.main.resources.srcDirs = ["src/main/resources", ".github/workflows"]
 
 repositories{
     mavenCentral()
