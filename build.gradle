@@ -59,14 +59,6 @@ jar{
     from{
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
     }
-
-    from(rootDir){
-        include "mod.hjson"
-    }
-
-    from("src/main/resources/"){
-        include "**"
-    }
 }
 
 task deploy(type: Jar){
