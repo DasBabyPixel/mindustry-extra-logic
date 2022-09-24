@@ -1,4 +1,4 @@
-name: Commit Testing
+name: Java CI
 
 on: [push]
 
@@ -22,3 +22,6 @@ jobs:
       with:
         name: ${{ github.event.repository.name }}
         path: build/libs/${{ github.event.repository.name }}.jar
+    - name: Automatic Releases
+      uses: marvinpinto/action-automatic-releases@v1.2.1
+    
