@@ -26,7 +26,7 @@ jobs:
       uses: marvinpinto/action-automatic-releases@v1.2.1
       with:
         automatic_release_tag: "latest"
-        prerelease:false
+        prerelease: false
         title: "latest build"
         files: |
           *.jar
