@@ -83,6 +83,7 @@ com_crashlytics_export_strings.xml
 /html/bin/
 /ios/bin/
 /ios-moe/bin/
+/bin/
 *.tmp
 *.bak
 *.swp
