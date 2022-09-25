@@ -1,23 +1,13 @@
 package extralogic;
 
-import static mindustry.type.ItemStack.*;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-
 import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
-import mindustry.Vars;
-import mindustry.content.Items;
+import extralogic.content.ExtraLogicBlocks;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.logic.LExecutor;
 import mindustry.mod.Mod;
-import mindustry.type.Category;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.world.blocks.logic.LogicBlock;
 
@@ -26,7 +16,7 @@ public class ExtraLogicMod extends Mod {
 	public static LogicBlock processor;
 
 	public ExtraLogicMod() {
-		Log.info("Loaded ExampleJavaMod constructor.");
+		Log.info("Initializing ExtraLogic!");
 //		// listen for game load event
 		Events.on(ClientLoadEvent.class, e -> {
 			// show dialog upon startup
@@ -40,24 +30,6 @@ public class ExtraLogicMod extends Mod {
 				dialog.cont.button("New Processor Instruction Limit: " + LExecutor.maxInstructions, dialog::hide)
 						.size(300f, 50f);
 				dialog.show();
-				
-				try {
-					FileOutputStream out = new FileOutputStream(new File("outtest.txt"));
-					System.out.println(new File("outtest.txt").getAbsolutePath());
-					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-					Vars.content.blocks().forEach(b->{
-						try {
-							bw.write(b.name);
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-					});
-					bw.close();
-					out.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				
 			});
 		});
 
@@ -65,24 +37,8 @@ public class ExtraLogicMod extends Mod {
 
 	@Override
 	public void loadContent() {
-		Log.info("Loading some example content.");
-		processor = new LogicBlock("elprocessor") {
-
-			{
-				requirements(Category.logic,
-						with(Items.lead, 320, Items.silicon, 80, Items.graphite, 60, Items.thorium, 50));
-				instructionsPerTick = 35;
-
-				range = 8 * 28;
-
-				size = 2;
-			}@Override
-			public void load() {
-				super.load();
-				Log.err("loading");
-			}
-
-		};
+		Log.info("Loading ExtraLogic content!");
+		ExtraLogicBlocks.load();
 	}
 
 }
