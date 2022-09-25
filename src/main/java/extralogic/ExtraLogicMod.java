@@ -23,8 +23,8 @@ public class ExtraLogicMod extends Mod {
 				dialog.cont.add("behold").row();
 				// mod sprites are prefixed with the mod name (this mod is called
 				// 'example-java-mod' in its config)
-				dialog.cont.image(Core.atlas.find("mindustry-extra-logic-frog")).pad(20f).row();
-				dialog.cont.button("New Processor Instruction Limit: " + LExecutor.maxInstructions, dialog::hide)
+				dialog.cont.image(Core.atlas.find("extra-logic-frog")).pad(20f).row();
+				dialog.cont.button("Processor Instruction Limit: " + LExecutor.maxInstructions, dialog::hide)
 						.size(300f, 50f);
 				dialog.show();
 			});
