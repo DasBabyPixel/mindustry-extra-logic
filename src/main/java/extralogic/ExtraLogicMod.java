@@ -9,11 +9,8 @@ import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.logic.LExecutor;
 import mindustry.mod.Mod;
 import mindustry.ui.dialogs.BaseDialog;
-import mindustry.world.blocks.logic.LogicBlock;
 
 public class ExtraLogicMod extends Mod {
-
-	public static LogicBlock processor;
 
 	public ExtraLogicMod() {
 		Log.info("Initializing ExtraLogic!");
@@ -21,7 +18,7 @@ public class ExtraLogicMod extends Mod {
 		Events.on(ClientLoadEvent.class, e -> {
 			// show dialog upon startup
 			Time.runTask(10f, () -> {
-				processor.unlock();
+				ExtraLogicBlocks.micro_processor.unlock();
 				BaseDialog dialog = new BaseDialog("frog");
 				dialog.cont.add("behold").row();
 				// mod sprites are prefixed with the mod name (this mod is called
