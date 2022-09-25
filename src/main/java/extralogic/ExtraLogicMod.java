@@ -2,10 +2,17 @@ package extralogic;
 
 import static mindustry.type.ItemStack.*;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
 import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
+import mindustry.Vars;
 import mindustry.content.Items;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.logic.LExecutor;
@@ -22,20 +29,35 @@ public class ExtraLogicMod extends Mod {
 		Log.info("Loaded ExampleJavaMod constructor.");
 //		// listen for game load event
 		Events.on(ClientLoadEvent.class, e -> {
-			processor.load();
-			processor.loadIcon();
-			processor.unlock();
-			
 			// show dialog upon startup
 			Time.runTask(10f, () -> {
+				processor.unlock();
 				BaseDialog dialog = new BaseDialog("frog");
 				dialog.cont.add("behold").row();
 				// mod sprites are prefixed with the mod name (this mod is called
 				// 'example-java-mod' in its config)
 				dialog.cont.image(Core.atlas.find("mindustry-extra-logic-frog")).pad(20f).row();
 				dialog.cont.button("New Processor Instruction Limit: " + LExecutor.maxInstructions, dialog::hide)
-						.size(100f, 50f);
+						.size(300f, 50f);
 				dialog.show();
+				
+				try {
+					FileOutputStream out = new FileOutputStream(new File("outtest.txt"));
+					System.out.println(new File("outtest.txt").getAbsolutePath());
+					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+					Vars.content.blocks().forEach(b->{
+						try {
+							bw.write(b.name);
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+					});
+					bw.close();
+					out.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				
 			});
 		});
 
@@ -54,6 +76,10 @@ public class ExtraLogicMod extends Mod {
 				range = 8 * 28;
 
 				size = 2;
+			}@Override
+			public void load() {
+				super.load();
+				Log.err("loading");
 			}
 
 		};
