@@ -9,8 +9,8 @@ public class ExtraLogicBlock extends Block {
 
 	public int range = 8 * 10;
 
-	public ExtraLogicBlock() {
-		super("extra-logic-processor");
+	public ExtraLogicBlock(String name) {
+		super(name);
 	}
 
 	public class ExtraLogicBuilding extends Building {
