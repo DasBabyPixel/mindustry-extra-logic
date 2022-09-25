@@ -8,7 +8,7 @@ name: "mindustry-extra-logic"
 author: "DasBabyPixel"
 
 #the fully qualified main class of the mod
-main: "example.ExtraLogicMod"
+main: "extralogic.ExtraLogicMod"
 
 #the mod description as seen in the mod dialog
 description: "Adds and improves logic functionality"

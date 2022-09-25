@@ -1,9 +1,10 @@
-package example;
+package extralogic;
 
 import arc.Core;
 import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
+import extralogic.logic.ExtraLogicProcessor;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.logic.LExecutor;
 import mindustry.mod.Mod;
@@ -13,7 +14,6 @@ public class ExtraLogicMod extends Mod {
 
 	public ExtraLogicMod() {
 		Log.info("Loaded ExampleJavaMod constructor.");
-		ReflectionHelper.set(LExecutor.class, "maxInstructions", null, 100000);
 //		// listen for game load event
 		Events.on(ClientLoadEvent.class, e -> {
 			// show dialog upon startup
@@ -34,6 +34,7 @@ public class ExtraLogicMod extends Mod {
 	@Override
 	public void loadContent() {
 		Log.info("Loading some example content.");
+		new ExtraLogicProcessor();
 	}
 
 }
