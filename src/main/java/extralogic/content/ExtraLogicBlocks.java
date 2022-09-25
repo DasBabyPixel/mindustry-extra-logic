@@ -11,7 +11,7 @@ public class ExtraLogicBlocks {
 	public static Block micro_processor, extra_processor, hyper_processor;
 
 	public static void load() {
-		micro_processor = new ExtraLogicBlock("el-micro-processor") {
+		micro_processor = new ExtraLogicBlock("micro-processor") {
 
 			{
 				requirements(Category.logic, ItemStack.with(Items.lead, 50), true);
