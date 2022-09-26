@@ -19,11 +19,11 @@ import arc.util.Align;
 import arc.util.Nullable;
 import arc.util.Strings;
 import arc.util.Tmp;
+import extralogic.logic.ExtraLCanvas.ExtraStatementElem;
 import mindustry.gen.LogicIO;
 import mindustry.gen.Tex;
 import mindustry.logic.LAssembler;
 import mindustry.logic.LCanvas;
-import mindustry.logic.LCanvas.StatementElem;
 import mindustry.logic.LCategory;
 import mindustry.logic.LExecutor.LInstruction;
 import mindustry.logic.LStatement;
@@ -36,7 +36,7 @@ import mindustry.ui.Styles;
  */
 public abstract class ExtraLStatement {
 
-	public transient @Nullable StatementElem elem;
+	public transient @Nullable ExtraStatementElem elem;
 
 	public abstract void build(Table table);
 
@@ -46,13 +46,13 @@ public abstract class ExtraLStatement {
 		return ExtraLCategory.fromLCategory(LCategory.unknown);
 	}
 
-	public LStatement copy() {
+	public ExtraLStatement copy() {
 		StringBuilder build = new StringBuilder();
 		write(build);
 		// assume privileged when copying, because there's no way privileged
 		// instructions can appear here anyway, and the instructions get validated on
 		// load anyway
-		Seq<LStatement> read = ExtraLAssembler.read(build.toString(), true);
+		Seq<ExtraLStatement> read = ExtraLAssembler.read(build.toString(), true);
 		return read.size == 0 ? null : read.first();
 	}
 

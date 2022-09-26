@@ -5,15 +5,12 @@ import static mindustry.Vars.*;
 import arc.struct.IntSet;
 import arc.struct.LongSeq;
 import arc.util.Nullable;
+import extralogic.content.ExtraLogicContent;
 import extralogic.logic.ExtraLogicBlock.ExtraLogicBuilding;
-import mindustry.content.Fx;
-import mindustry.core.World;
-import mindustry.entities.Damage;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.Var;
-import mindustry.logic.Remote;
 
 /**
  * From {@link LExecutor}
@@ -106,43 +103,43 @@ public class ExtraLExecutor {
 	public ExtraVar var(int index) {
 		// global constants have variable IDs < 0, and they are fetched from the global
 		// constants object after being negated
-		return index < 0 ? logicVars.get(-index) : vars[index];
+		return index < 0 ? ExtraLogicContent.logicVars.get(-index) : vars[index];
 	}
 
 	public @Nullable Building building(int index) {
-		Object o = var(index).objval;
-		return var(index).isobj && o instanceof Building building ? building : null;
+		Object o = var(index).handle.objval;
+		return var(index).handle.isobj && o instanceof Building building ? building : null;
 	}
 
 	public @Nullable Object obj(int index) {
-		Object o = var(index).objval;
-		return var(index).isobj ? o : null;
+		Object o = var(index).handle.objval;
+		return var(index).handle.isobj ? o : null;
 	}
 
 	public @Nullable Team team(int index) {
-		Var v = var(index);
-		if (v.isobj) {
-			return v.objval instanceof Team t ? t : null;
+		ExtraVar v = var(index);
+		if (v.handle.isobj) {
+			return v.handle.objval instanceof Team t ? t : null;
 		}
-		int t = (int) v.numval;
+		int t = (int) v.handle.numval;
 		if (t < 0 || t >= Team.all.length)
 			return null;
 		return Team.all[t];
 	}
 
 	public boolean bool(int index) {
-		Var v = var(index);
-		return v.isobj ? v.objval != null : Math.abs(v.numval) >= 0.00001;
+		ExtraVar v = var(index);
+		return v.handle.isobj ? v.handle.objval != null : Math.abs(v.handle.numval) >= 0.00001;
 	}
 
 	public double num(int index) {
-		Var v = var(index);
-		return v.isobj ? v.objval != null ? 1 : 0 : invalid(v.numval) ? 0 : v.numval;
+		ExtraVar v = var(index);
+		return v.handle.isobj ? v.handle.objval != null ? 1 : 0 : invalid(v.handle.numval) ? 0 : v.handle.numval;
 	}
 
 	public float numf(int index) {
-		Var v = var(index);
-		return v.isobj ? v.objval != null ? 1 : 0 : invalid(v.numval) ? 0 : (float) v.numval;
+		ExtraVar v = var(index);
+		return v.handle.isobj ? v.handle.objval != null ? 1 : 0 : invalid(v.handle.numval) ? 0 : (float) v.handle.numval;
 	}
 
 	public int numi(int index) {
@@ -154,31 +151,31 @@ public class ExtraLExecutor {
 	}
 
 	public void setnum(int index, double value) {
-		Var v = var(index);
-		if (v.constant)
+		ExtraVar v = var(index);
+		if (v.handle.constant)
 			return;
 		if (invalid(value)) {
-			v.objval = null;
-			v.isobj = true;
+			v.handle.objval = null;
+			v.handle.isobj = true;
 		} else {
-			v.numval = value;
-			v.objval = null;
-			v.isobj = false;
+			v.handle.numval = value;
+			v.handle.objval = null;
+			v.handle.isobj = false;
 		}
 	}
 
 	public void setobj(int index, Object value) {
-		Var v = var(index);
-		if (v.constant)
+		ExtraVar v = var(index);
+		if (v.handle.constant)
 			return;
-		v.objval = value;
-		v.isobj = true;
+		v.handle.objval = value;
+		v.handle.isobj = true;
 	}
 
 	public void setconst(int index, Object value) {
-		Var v = var(index);
-		v.objval = value;
-		v.isobj = true;
+		ExtraVar v = var(index);
+		v.handle.objval = value;
+		v.handle.isobj = true;
 	}
 
 	// endregion
@@ -248,23 +245,23 @@ public class ExtraLExecutor {
 		return false;
 	}
 
-	@Remote(called = Loc.server)
-	public static void setMapArea(int x, int y, int w, int h) {
-		checkMapArea(x, y, w, h, true);
-	}
-
-	@Remote(called = Loc.server, unreliable = true)
-	public static void logicExplosion(Team team, float x, float y, float radius, float damage, boolean air,
-			boolean ground, boolean pierce) {
-		if (damage < 0f)
-			return;
-
-		Damage.damage(team, x, y, radius, damage, pierce, air, ground);
-		if (pierce) {
-			Fx.spawnShockwave.at(x, y, World.conv(radius));
-		} else {
-			Fx.dynamicExplosion.at(x, y, World.conv(radius) / 8f);
-		}
-	}
+//	@Remote(called = Loc.server)
+//	public static void setMapArea(int x, int y, int w, int h) {
+//		checkMapArea(x, y, w, h, true);
+//	}
+//
+//	@Remote(called = Loc.server, unreliable = true)
+//	public static void logicExplosion(Team team, float x, float y, float radius, float damage, boolean air,
+//			boolean ground, boolean pierce) {
+//		if (damage < 0f)
+//			return;
+//
+//		Damage.damage(team, x, y, radius, damage, pierce, air, ground);
+//		if (pierce) {
+//			Fx.spawnShockwave.at(x, y, World.conv(radius));
+//		} else {
+//			Fx.dynamicExplosion.at(x, y, World.conv(radius) / 8f);
+//		}
+//	}
 
 }

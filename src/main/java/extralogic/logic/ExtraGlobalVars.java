@@ -30,7 +30,7 @@ import mindustry.world.Block;
  * 
  * @author DasBabyPixel
  */
-public class ExtraLogicVars {
+public class ExtraGlobalVars {
 
 	public ExtraVar get(int id) {
 		return this.vars.items[id];
@@ -42,7 +42,7 @@ public class ExtraLogicVars {
 
 	public void init() {
 
-		Iterator var14 = Vars.content.items().iterator();
+		Iterator<?> var14 = Vars.content.items().iterator();
 
 		while (var14.hasNext()) {
 			Item item = (Item) var14.next();
@@ -74,9 +74,9 @@ public class ExtraLogicVars {
 		}
 
 		LAccess[] var17 = LAccess.all;
-		var2 = var17.length;
+		int var2 = var17.length;
 
-		for (var3 = 0; var3 < var2; ++var3) {
+		for (int var3 = 0; var3 < var2; ++var3) {
 			LAccess sensor = var17[var3];
 			this.put("@" + sensor.name(), sensor);
 		}
@@ -144,26 +144,25 @@ public class ExtraLogicVars {
 					name
 			});
 			return existingIdx;
-		} else {
-			Var var = new Var(name);
-			var.constant = true;
-			if (value instanceof Number) {
-				Number num = (Number) value;
-				var.numval = num.doubleValue();
-			} else {
-				var.isobj = true;
-				var.objval = value;
-			}
-
-			int index = this.vars.size;
-			this.namesToIds.put(name, index);
-			this.vars.add(var);
-			return index;
 		}
+		Var var = new Var(name);
+		var.constant = true;
+		if (value instanceof Number) {
+			Number num = (Number) value;
+			var.numval = num.doubleValue();
+		} else {
+			var.isobj = true;
+			var.objval = value;
+		}
+
+		int index = this.vars.size;
+		this.namesToIds.put(name, index);
+		this.vars.add(new ExtraVar(var));
+		return index;
 	}
 
 	public void set(int id, double value) {
-		this.get(id).numval = value;
+		this.get(id).handle.numval = value;
 	}
 
 	public void update() {
@@ -175,7 +174,7 @@ public class ExtraLogicVars {
 		this.vars.items[varWaveTime].handle.numval = Vars.state.wavetime / 60.0F;
 	}
 
-	private ObjectIntMap<String> namesToIds = new ObjectIntMap();
+	private ObjectIntMap<String> namesToIds = new ObjectIntMap<>();
 
 	private Seq<ExtraVar> vars = new Seq<>(ExtraVar.class);
 

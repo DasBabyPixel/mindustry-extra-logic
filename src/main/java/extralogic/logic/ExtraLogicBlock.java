@@ -22,7 +22,8 @@ import arc.util.Strings;
 import arc.util.Structs;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
-import extralogic.logic.ExtraLAssembler.BVar;
+import extralogic.logic.ExtraLAssembler.ExtraBVar;
+import extralogic.logic.ExtraLExecutor.ExtraVar;
 import mindustry.ai.types.LogicAI;
 import mindustry.core.World;
 import mindustry.gen.Building;
@@ -34,7 +35,7 @@ import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
 import mindustry.io.TypeIO.BuildingBox;
 import mindustry.io.TypeIO.UnitBox;
-import mindustry.logic.LAssembler;
+import mindustry.logic.LAssembler.BVar;
 import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.Var;
 import mindustry.logic.Ranged;
@@ -346,12 +347,12 @@ public class ExtraLogicBlock extends Block {
 
 					if (keep) {
 						// store any older variables
-						for (Var var : executor.vars) {
-							boolean unit = var.name.equals("@unit");
-							if (!var.constant || unit) {
-								BVar dest = asm.getVar(var.name);
+						for (ExtraVar var : executor.vars) {
+							boolean unit = var.handle.name.equals("@unit");
+							if (!var.handle.constant || unit) {
+								ExtraBVar dest = asm.getVar(var.handle.name);
 								if (dest != null && (!dest.constant || unit)) {
-									dest.value = var.isobj ? var.objval : var.numval;
+									dest.value = var.handle.isobj ? var.handle.objval : var.handle.numval;
 								}
 							}
 						}
@@ -369,7 +370,7 @@ public class ExtraLogicBlock extends Block {
 					executor.load(asm);
 				} catch (Exception e) {
 					// handle malformed code and replace it with nothing
-					executor.load(LAssembler.assemble(code = "", privileged));
+					executor.load(ExtraLAssembler.assemble(code = "", privileged));
 				}
 			}
 		}

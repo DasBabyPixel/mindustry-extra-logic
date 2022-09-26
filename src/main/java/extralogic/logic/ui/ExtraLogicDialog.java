@@ -15,19 +15,22 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Time;
+import extralogic.logic.ExtraLCanvas;
+import extralogic.logic.ExtraLCategory;
 import extralogic.logic.ExtraLExecutor;
+import extralogic.logic.ExtraLStatement;
+import extralogic.logic.ExtraLogicIO;
+import extralogic.logic.WrapperExtraLStatement;
 import mindustry.core.GameState.State;
 import mindustry.ctype.Content;
 import mindustry.gen.Building;
 import mindustry.gen.Icon;
-import mindustry.gen.LogicIO;
 import mindustry.gen.Tex;
 import mindustry.gen.Unit;
 import mindustry.graphics.Pal;
 import mindustry.logic.LCategory;
 import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.PrintI;
-import mindustry.logic.LStatement;
 import mindustry.logic.LStatements.InvalidStatement;
 import mindustry.logic.LogicDialog;
 import mindustry.ui.Fonts;
@@ -51,29 +54,29 @@ public class ExtraLogicDialog extends BaseDialog {
 	@Nullable
 	ExtraLExecutor executor;
 
-	public ExtraLogicDialog(){
-        super("logic");
+	public ExtraLogicDialog() {
+		super("logic");
 
-        clearChildren();
+		clearChildren();
 
-        canvas = new ExtraLCanvas();
-        shouldPause = true;
+		canvas = new ExtraLCanvas();
+		shouldPause = true;
 
-        addCloseListener();
+		addCloseListener();
 
-        shown(this::setup);
-        hidden(() -> consumer.get(canvas.save()));
-        onResize(() -> {
-            setup();
-            canvas.rebuild();
-        });
+		shown(this::setup);
+		hidden(() -> consumer.get(canvas.save()));
+		onResize(() -> {
+			setup();
+			canvas.rebuild();
+		});
 
-        add(canvas).grow().name("canvas");
+		add(canvas).grow().name("canvas");
 
-        row();
+		row();
 
-        add(buttons).growX().name("canvas");
-    }
+		add(buttons).growX().name("canvas");
+	}
 
 	private void setup() {
 		buttons.clearChildren();
@@ -129,7 +132,8 @@ public class ExtraLogicDialog extends BaseDialog {
 				p.margin(10f).marginRight(16f);
 				p.table(Tex.button, t -> {
 					t.defaults().fillX().height(45f);
-					for (var s : executor.vars) {
+					for (var es : executor.vars) {
+						var s = es.handle;
 						if (s.constant)
 							continue;
 
@@ -213,13 +217,15 @@ public class ExtraLogicDialog extends BaseDialog {
 			dialog.cont.table(table -> {
 				table.background(Tex.button);
 				table.pane(t -> {
-					for (Prov<LStatement> prov : LogicIO.allStatements) {
-						LStatement example = prov.get();
-						if (example instanceof InvalidStatement || example.hidden()
+					for (Prov<ExtraLStatement> prov : ExtraLogicIO.allStatements()) {
+						ExtraLStatement example = prov.get();
+						if ((example instanceof WrapperExtraLStatement wrapper
+								&& wrapper.handle instanceof InvalidStatement) || example.hidden()
 								|| (example.privileged() && !privileged) || (example.nonPrivileged() && privileged))
 							continue;
 
-						LCategory category = example.category();
+						ExtraLCategory ecategory = example.category();
+						LCategory category = ecategory.handle;
 						Table cat = t.find(category.name);
 						if (cat == null) {
 							t.table(s -> {
