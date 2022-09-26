@@ -413,7 +413,7 @@ public class ExtraLCanvas extends Table{
                     public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
                         statements.finishLayout();
                     }
-                });
+                });y
             }).growX().height(38);
 
             row();
