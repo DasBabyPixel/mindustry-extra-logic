@@ -67,4 +67,9 @@ public class WrapperExtraLStatement extends ExtraLStatement {
 		handle.saveUI();
 	}
 
+	@Override
+	public String toString() {
+		return handle.toString();
+	}
+
 }

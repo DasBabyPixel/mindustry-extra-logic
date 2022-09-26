@@ -55,7 +55,7 @@ public class ExtraLCanvas extends Table {
 
 	public ScrollPane pane;
 
-	public Group jumps;
+	private Group jumps;
 
 	public ExtraStatementElem dragging;
 
@@ -76,6 +76,9 @@ public class ExtraLCanvas extends Table {
 
 			@Override
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button) {
+				if (!visible) {
+					return super.touchDown(event, x, y, pointer, button);
+				}
 				// hide tooltips on tap
 				for (var t : tooltips) {
 					t.container.toFront();
@@ -95,6 +98,19 @@ public class ExtraLCanvas extends Table {
 	/** @return if statement elements should have rows. */
 	public static boolean useRows() {
 		return Core.graphics.getWidth() < Scl.scl(900f) * 1.2f;
+	}
+
+	public boolean shouldCompact() {
+		return statements != null && statements.seq.size > 1000;
+	}
+
+	@Override
+	public void updateVisibility() {
+		boolean ovis = visible;
+		super.updateVisibility();
+		if (ovis != visible && visible) {
+			rebuild();
+		}
 	}
 
 	public static void tooltip(Cell<?> cell, String key) {
@@ -140,6 +156,8 @@ public class ExtraLCanvas extends Table {
 	}
 
 	public void rebuild() {
+		if (!visible)
+			return;
 		targetWidth = useRows() ? 400f : 900f;
 		float s = pane != null ? pane.getScrollPercentY() : 0f;
 		String toLoad = statements != null ? save() : null;

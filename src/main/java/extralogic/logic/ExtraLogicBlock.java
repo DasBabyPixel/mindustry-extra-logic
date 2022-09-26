@@ -46,7 +46,6 @@ import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock.ConstructBuild;
 import mindustry.world.blocks.logic.LogicBlock;
-import mindustry.world.blocks.logic.LogicBlock.LogicBuild;
 import mindustry.world.meta.BlockGroup;
 import mindustry.world.meta.Env;
 import mindustry.world.meta.Stat;
@@ -59,13 +58,16 @@ import mindustry.world.meta.StatUnit;
  */
 public class ExtraLogicBlock extends Block {
 
-	public int instructionsPerTick;
-
-	public float range = 8 * 10;
-
-	public int maxInstructionsPerTick = 40;
+//	private static final int maxByteLen = 1024 * 500;
 
 	public int maxInstructionScale = 5;
+
+	public int instructionsPerTick = 1;
+
+	// privileged only
+	public int maxInstructionsPerTick = 40;
+
+	public float range = 8 * 10;
 
 	public ExtraLogicBlock(String name) {
 		super(name);
@@ -74,6 +76,8 @@ public class ExtraLogicBlock extends Block {
 		configurable = true;
 		group = BlockGroup.logic;
 		schematicPriority = 5;
+
+		// universal, no real requirements
 		envEnabled = Env.any;
 
 		config(byte[].class, (ExtraLogicBuilding build, byte[] data) -> {
@@ -175,6 +179,7 @@ public class ExtraLogicBlock extends Block {
 	@Override
 	public void setStats() {
 		super.setStats();
+
 		if (!privileged) {
 			stats.add(Stat.linkRange, range / 8, StatUnit.blocks);
 			stats.add(Stat.instructions, instructionsPerTick * 60, StatUnit.perSecond);
@@ -183,9 +188,10 @@ public class ExtraLogicBlock extends Block {
 
 	@Override
 	public void drawPlace(int x, int y, int rotation, boolean valid) {
-		if (!this.privileged) {
-			Drawf.circles(x * 8 + this.offset, y * 8 + this.offset, this.range);
-		}
+		if (privileged)
+			return;
+
+		Drawf.circles(x * tilesize + offset, y * tilesize + offset, range);
 	}
 
 	@Override
@@ -254,11 +260,6 @@ public class ExtraLogicBlock extends Block {
 
 	}
 
-	/**
-	 * From {@link LogicBuild}
-	 * 
-	 * @author DasBabyPixel
-	 */
 	public class ExtraLogicBuilding extends Building implements Ranged {
 
 		/** logic "source code" as list of asm statements */
@@ -404,12 +405,13 @@ public class ExtraLogicBlock extends Block {
 
 					if (keep) {
 						// store any older variables
-						for (ExtraVar var : executor.vars) {
-							boolean unit = var.handle.name.equals("@unit");
-							if (!var.handle.constant || unit) {
-								ExtraBVar dest = asm.getVar(var.handle.name);
+						for (ExtraVar evar : executor.vars) {
+							Var var = evar.handle;
+							boolean unit = var.name.equals("@unit");
+							if (!var.constant || unit) {
+								ExtraBVar dest = asm.getVar(var.name);
 								if (dest != null && (!dest.constant || unit)) {
-									dest.value = var.handle.isobj ? var.handle.objval : var.handle.numval;
+									dest.value = var.isobj ? var.objval : var.numval;
 								}
 							}
 						}
@@ -424,8 +426,11 @@ public class ExtraLogicBlock extends Block {
 					asm.putConst("@thisx", World.conv(x));
 					asm.putConst("@thisy", World.conv(y));
 
+					Log.info("Loading new code into ExtraLExecutor");
 					executor.load(asm);
 				} catch (Exception e) {
+					Log.info("Malformed logic code");
+					Log.err(e);
 					// handle malformed code and replace it with nothing
 					executor.load(ExtraLAssembler.assemble(code = "", privileged));
 				}
@@ -628,9 +633,8 @@ public class ExtraLogicBlock extends Block {
 			}
 
 			table.button(Icon.pencil, Styles.cleari, () -> {
-				ExtraLogicContent.ui.dialog.show(code, executor, privileged, code -> {
-					configure(compress(code, relativeConnections()));
-				});
+				ExtraLogicContent.ui.dialog.show(code, executor, privileged,
+						code -> configure(compress(code, relativeConnections())));
 			}).size(40);
 		}
 

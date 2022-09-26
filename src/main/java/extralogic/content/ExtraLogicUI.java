@@ -1,6 +1,6 @@
 package extralogic.content;
 
-import extralogic.logic.ui.ExtraLogicDialog;
+import extralogic.logic.ExtraLogicDialog;
 
 public class ExtraLogicUI {
 

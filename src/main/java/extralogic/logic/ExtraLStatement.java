@@ -38,6 +38,8 @@ public abstract class ExtraLStatement {
 
 	public transient @Nullable ExtraStatementElem elem;
 
+	public transient String name;
+
 	public abstract void build(Table table);
 
 	public abstract ExtraLInstruction build(ExtraLAssembler builder);
@@ -244,7 +246,9 @@ public abstract class ExtraLStatement {
 	}
 
 	public String name() {
-		return Strings.insertSpaces(getClass().getSimpleName().replace("Statement", ""));
+		if (name != null)
+			return name;
+		return name = Strings.insertSpaces(getClass().getSimpleName().replace("Statement", ""));
 	}
 
 }

@@ -1,4 +1,4 @@
-package extralogic.logic.ui;
+package extralogic.logic;
 
 import static mindustry.Vars.*;
 import static mindustry.logic.LCanvas.*;
@@ -15,12 +15,6 @@ import arc.scene.ui.layout.Table;
 import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Time;
-import extralogic.logic.ExtraLCanvas;
-import extralogic.logic.ExtraLCategory;
-import extralogic.logic.ExtraLExecutor;
-import extralogic.logic.ExtraLStatement;
-import extralogic.logic.ExtraLogicIO;
-import extralogic.logic.WrapperExtraLStatement;
 import mindustry.core.GameState.State;
 import mindustry.ctype.Content;
 import mindustry.gen.Building;
@@ -53,6 +47,8 @@ public class ExtraLogicDialog extends BaseDialog {
 	@Nullable
 	public ExtraLExecutor executor;
 
+	private boolean compact = false;
+
 	public ExtraLogicDialog() {
 		super("logic");
 
@@ -67,9 +63,11 @@ public class ExtraLogicDialog extends BaseDialog {
 		hidden(() -> consumer.get(canvas.save()));
 		onResize(() -> {
 			setup();
+
 			canvas.rebuild();
 		});
 
+		canvas.visible(() -> !compactView());
 		add(canvas).grow().name("canvas");
 
 		row();
@@ -77,11 +75,36 @@ public class ExtraLogicDialog extends BaseDialog {
 		add(buttons).growX().name("canvas");
 	}
 
+	private BaseDialog lastCompactView = null;
+
+	private boolean compactView() {
+		boolean ncompact = canvas.shouldCompact();
+		if (ncompact != compact && ncompact) {
+			BaseDialog dialog = new BaseDialog("Code too large");
+			dialog.cont.add("The Logic code you added exceeds the 1000 instructions limit!").row();
+			dialog.cont.add("Switching to compact mode for better performance.").row();
+			dialog.cont.add(
+					"Compact mode disables adding rows and hides the view. Until better performance is implemented this is the limit")
+					.row();
+			dialog.cont.button("Understood", dialog::hide).size(300, 50);
+			dialog.show();
+			dialog.hidden(() -> {
+				if (lastCompactView == dialog)
+					lastCompactView = null;
+			});
+			if (lastCompactView != null) {
+				lastCompactView.hide();
+			}
+			lastCompactView = dialog;
+		}
+		compact = ncompact;
+		return ncompact;
+	}
+
 	private void setup() {
 		buttons.clearChildren();
 		buttons.defaults().size(160f, 64f);
 		buttons.button("@back", Icon.left, this::hide).name("back");
-
 		buttons.button("@edit", Icon.edit, () -> {
 			BaseDialog dialog = new BaseDialog("@editor.export");
 			dialog.cont.pane(p -> {
@@ -218,10 +241,19 @@ public class ExtraLogicDialog extends BaseDialog {
 				table.pane(t -> {
 					for (Prov<ExtraLStatement> prov : ExtraLogicIO.allStatements()) {
 						ExtraLStatement example = prov.get();
-						if ((example instanceof WrapperExtraLStatement wrapper
-								&& wrapper.handle instanceof InvalidStatement) || example.hidden()
-								|| (example.privileged() && !privileged) || (example.nonPrivileged() && privileged))
+						if (example instanceof WrapperExtraLStatement wrapper
+								&& wrapper.handle instanceof InvalidStatement) {
 							continue;
+						}
+						if (example.hidden()) {
+							continue;
+						}
+						if (example.privileged() && !privileged) {
+							continue;
+						}
+						if (example.nonPrivileged() && privileged) {
+							continue;
+						}
 
 						ExtraLCategory ecategory = example.category();
 						LCategory category = ecategory.handle;
@@ -262,7 +294,23 @@ public class ExtraLogicDialog extends BaseDialog {
 			}).fill().maxHeight(Core.graphics.getHeight() * 0.8f);
 			dialog.addCloseButton();
 			dialog.show();
-		});
+		}).disabled(b -> compactView());
+		buttons.button("@clear", () -> {
+			BaseDialog dialog = new BaseDialog("Confirmation");
+			dialog.cont.add("You are about to clear all contents of this processor. Are you sure?");
+			dialog.cont.button("Yes", () -> {
+				try {
+					canvas.load("");
+				} catch (Throwable ex) {
+					ui.showException(ex);
+				}
+				dialog.hide();
+			}).size(200, 50);
+			dialog.cont.button("No", () -> {
+				dialog.hide();
+			}).size(200, 50);
+			dialog.show();
+		}).name("clear").disabled(t -> canvas.statements.seq.size == 0);
 	}
 
 	public void show(String code, ExtraLExecutor executor, boolean privileged, Cons<String> modified) {

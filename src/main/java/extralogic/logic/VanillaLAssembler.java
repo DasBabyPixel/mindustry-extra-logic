@@ -17,21 +17,21 @@ public class VanillaLAssembler extends LAssembler {
 	public BVar getVar(String name) {
 		if (usable)
 			return handle.getVar(name).vanillaClone();
-		return null;
+		return new BVar(-1);
 	}
 
 	@Override
 	public BVar putConst(String name, Object value) {
 		if (usable)
 			return handle.putConst(name, value).vanillaClone();
-		return null;
+		return new BVar(-1);
 	}
 
 	@Override
 	public BVar putVar(String name) {
 		if (usable)
 			return handle.putVar(name).vanillaClone();
-		return null;
+		return new BVar(-1);
 	}
 
 	@Override

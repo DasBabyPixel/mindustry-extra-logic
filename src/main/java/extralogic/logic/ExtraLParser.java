@@ -25,7 +25,7 @@ public class ExtraLParser {
 
 	private static final ObjectIntMap<String> jumpLocations = new ObjectIntMap<>();
 
-	Seq<ExtraLStatement> statements = new Seq<>();
+	private Seq<ExtraLStatement> statements = new Seq<>();
 
 	public char[] chars;
 
@@ -155,6 +155,7 @@ public class ExtraLParser {
 					// replace invalid statements
 					st = new WrapperExtraLStatement(new InvalidStatement());
 				}
+//				Log.info("Read @", st != null ? st.toString() : "null");
 
 				// discard misplaced privileged instructions
 				if (!privileged && st != null && st.privileged()) {
