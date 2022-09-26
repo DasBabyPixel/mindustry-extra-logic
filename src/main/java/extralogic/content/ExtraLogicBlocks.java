@@ -25,6 +25,7 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 		logic_processor = new ExtraLogicBlock("logic-processor") {
 
 			{
+				size = 2;
 				registerParent(this, Blocks.logicProcessor);
 			}
 
@@ -32,6 +33,7 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 		hyper_processor = new ExtraLogicBlock("hyper-processor") {
 
 			{
+				size = 3;
 				registerParent(this, Blocks.hyperProcessor);
 			}
 
@@ -39,14 +41,6 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 	}
 
 	private static void registerParent(Block self, Block parent) {
-		self.breakable = parent.breakable;
-		self.size = parent.size;
-		self.solid = parent.solid;
-		self.configurable = parent.configurable;
-		self.update = parent.update;
-		self.group = parent.group;
-		self.health = parent.health;
-		self.scaledHealth = parent.scaledHealth;
 		self.requirements(parent.category, parent.requirements, unlockAll || parent.unlocked());
 		final AtomicReference<Cons<EventType.UnlockEvent>> ref = new AtomicReference<>(null);
 		final Cons<EventType.UnlockEvent> eventHandler = e -> {

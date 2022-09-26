@@ -20,12 +20,12 @@ import arc.util.Nullable;
 import arc.util.Strings;
 import arc.util.Tmp;
 import extralogic.logic.ExtraLCanvas.ExtraStatementElem;
+import extralogic.logic.ExtraLExecutor.ExtraLInstruction;
 import mindustry.gen.LogicIO;
 import mindustry.gen.Tex;
 import mindustry.logic.LAssembler;
 import mindustry.logic.LCanvas;
 import mindustry.logic.LCategory;
-import mindustry.logic.LExecutor.LInstruction;
 import mindustry.logic.LStatement;
 import mindustry.ui.Styles;
 
@@ -40,7 +40,7 @@ public abstract class ExtraLStatement {
 
 	public abstract void build(Table table);
 
-	public abstract LInstruction build(ExtraLAssembler builder);
+	public abstract ExtraLInstruction build(ExtraLAssembler builder);
 
 	public ExtraLCategory category() {
 		return ExtraLCategory.fromLCategory(LCategory.unknown);

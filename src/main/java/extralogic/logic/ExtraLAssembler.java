@@ -6,10 +6,11 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.Strings;
+import extralogic.content.ExtraLogicContent;
 import extralogic.logic.ExtraLExecutor.ExtraLInstruction;
 import mindustry.Vars;
 import mindustry.logic.LAssembler;
-import mindustry.logic.LExecutor.LInstruction;
+import mindustry.logic.LAssembler.BVar;
 
 /**
  * Alternative {@link LAssembler}
@@ -32,21 +33,30 @@ public class ExtraLAssembler {
 	/** All instructions to be executed. */
 	public ExtraLInstruction[] instructions;
 
-	public ExtraLAssembler(){
-        //instruction counter
-        putVar("@counter").value = 0;
-        //currently controlled unit
-        putConst("@unit", null);
-        //reference to self
-        putConst("@this", null);
-    }
+	private VanillaLAssembler vanillaClone = null;
+
+	public ExtraLAssembler() {
+		// instruction counter
+		putVar("@counter").value = 0;
+		// currently controlled unit
+		putConst("@unit", null);
+		// reference to self
+		putConst("@this", null);
+	}
+
+	public VanillaLAssembler vanillaClone() {
+		if(vanillaClone==null) {
+			vanillaClone = new VanillaLAssembler(this);
+		}
+		return vanillaClone;
+	}
 
 	public static ExtraLAssembler assemble(String data, boolean privileged) {
 		ExtraLAssembler asm = new ExtraLAssembler();
 
 		Seq<ExtraLStatement> st = read(data, privileged);
 
-		asm.instructions = st.map(l -> l.build(asm)).filter(l -> l != null).toArray(LInstruction.class);
+		asm.instructions = st.map(l -> l.build(asm)).filter(l -> l != null).toArray(ExtraLInstruction.class);
 		return asm;
 	}
 
@@ -77,6 +87,12 @@ public class ExtraLAssembler {
 		if (constId > 0) {
 			// global constants are *negated* and stored separately
 			return -constId;
+		}
+		if (constId == -1) {
+			constId = ExtraLogicContent.logicVars.get(symbol);
+			if (constId > 0) {
+				return -constId;
+			}
 		}
 
 		symbol = symbol.trim();
@@ -155,6 +171,13 @@ public class ExtraLAssembler {
 		}
 
 		ExtraBVar() {
+		}
+
+		public BVar vanillaClone() {
+			BVar bv = new BVar(id);
+			bv.constant = constant;
+			bv.value = value;
+			return bv;
 		}
 
 		@Override

@@ -22,6 +22,7 @@ import arc.util.Strings;
 import arc.util.Structs;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import extralogic.content.ExtraLogicContent;
 import extralogic.logic.ExtraLAssembler.ExtraBVar;
 import extralogic.logic.ExtraLExecutor.ExtraVar;
 import mindustry.ai.types.LogicAI;
@@ -35,7 +36,6 @@ import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
 import mindustry.io.TypeIO.BuildingBox;
 import mindustry.io.TypeIO.UnitBox;
-import mindustry.logic.LAssembler.BVar;
 import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.Var;
 import mindustry.logic.Ranged;
@@ -200,6 +200,7 @@ public class ExtraLogicBlock extends Block {
 
 	/**
 	 * From {@link LogicBuild}
+	 * 
 	 * @author DasBabyPixel
 	 */
 	public class ExtraLogicBuilding extends Building implements Ranged {
@@ -571,7 +572,8 @@ public class ExtraLogicBlock extends Block {
 			}
 
 			table.button(Icon.pencil, Styles.cleari, () -> {
-				ui.logic.show(code, executor, privileged, code -> configure(compress(code, relativeConnections())));
+				ExtraLogicContent.ui.dialog.show(code, executor, privileged,
+						code -> configure(compress(code, relativeConnections())));
 			}).size(40);
 		}
 
@@ -604,12 +606,13 @@ public class ExtraLogicBlock extends Block {
 			write.b(compressed);
 
 			// write only the non-constant variables
-			int count = Structs.count(executor.vars,
-					v -> (!v.constant || v == executor.vars[LExecutor.varUnit]) && !(v.isobj && v.objval == null));
+			int count = Structs.count(executor.vars, v -> (!v.handle.constant || v == executor.vars[LExecutor.varUnit])
+					&& !(v.handle.isobj && v.handle.objval == null));
 
 			write.i(count);
 			for (int i = 0; i < executor.vars.length; i++) {
-				Var v = executor.vars[i];
+				ExtraVar ev = executor.vars[i];
+				Var v = ev.handle;
 
 				// null is the default variable value, so waste no time serializing that
 				if (v.isobj && v.objval == null)
@@ -673,7 +676,7 @@ public class ExtraLogicBlock extends Block {
 			loadBlock = () -> updateCode(code, false, asm -> {
 				// load up the variables that were stored
 				for (int i = 0; i < varcount; i++) {
-					BVar dest = asm.getVar(names[i]);
+					ExtraBVar dest = asm.getVar(names[i]);
 
 					if (dest != null && (!dest.constant || dest.id == LExecutor.varUnit)) {
 						dest.value = values[i] instanceof BuildingBox box ? box.unbox()

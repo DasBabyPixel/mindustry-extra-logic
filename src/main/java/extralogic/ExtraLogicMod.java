@@ -5,6 +5,8 @@ import arc.Events;
 import arc.util.Log;
 import arc.util.Time;
 import extralogic.content.ExtraLogicBlocks;
+import extralogic.content.ExtraLogicContent;
+import extralogic.content.ExtraLogicUI;
 import mindustry.game.EventType.ClientLoadEvent;
 import mindustry.logic.LExecutor;
 import mindustry.mod.Mod;
@@ -36,6 +38,11 @@ public class ExtraLogicMod extends Mod {
 	public void loadContent() {
 		Log.info("Loading ExtraLogic content!");
 		ExtraLogicBlocks.load();
+	}
+	
+	@Override
+	public void init() {
+		ExtraLogicContent.ui = new ExtraLogicUI();
 	}
 
 }

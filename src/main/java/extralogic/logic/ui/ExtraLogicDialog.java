@@ -49,10 +49,10 @@ public class ExtraLogicDialog extends BaseDialog {
 	Cons<String> consumer = s -> {
 	};
 
-	boolean privileged;
+	public boolean privileged;
 
 	@Nullable
-	ExtraLExecutor executor;
+	public ExtraLExecutor executor;
 
 	public ExtraLogicDialog() {
 		super("logic");

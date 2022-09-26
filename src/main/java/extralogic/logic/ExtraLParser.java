@@ -185,7 +185,7 @@ public class ExtraLParser {
 
 	}
 
-	Seq<ExtraLStatement> parse() {
+	public Seq<ExtraLStatement> parse() {
 		jumps.clear();
 		jumpLocations.clear();
 
