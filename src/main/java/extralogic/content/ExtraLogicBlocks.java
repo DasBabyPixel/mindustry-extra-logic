@@ -6,6 +6,7 @@ import arc.Events;
 import arc.func.Cons;
 import extralogic.logic.ExtraLogicBlock;
 import mindustry.content.Blocks;
+import mindustry.content.Liquids;
 import mindustry.game.EventType;
 import mindustry.world.Block;
 
@@ -17,7 +18,8 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 		micro_processor = new ExtraLogicBlock("micro-processor") {
 
 			{
-				registerParent(this, Blocks.microProcessor);
+				instructionsPerTick = 2;
+				registerParentAndItems(this, Blocks.microProcessor);
 
 			}
 
@@ -26,7 +28,9 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 
 			{
 				size = 2;
-				registerParent(this, Blocks.logicProcessor);
+				range = 8 * 22;
+				instructionsPerTick = 8;
+				registerParentAndItems(this, Blocks.logicProcessor);
 			}
 
 		};
@@ -34,13 +38,17 @@ public class ExtraLogicBlocks extends ExtraLogicContent {
 
 			{
 				size = 3;
-				registerParent(this, Blocks.hyperProcessor);
+				range = 8 * 42;
+				instructionsPerTick = 25;
+				hasLiquids = true;
+				consumeLiquid(Liquids.cryofluid, 0.08f);
+				registerParentAndItems(this, Blocks.hyperProcessor);
 			}
 
 		};
 	}
 
-	private static void registerParent(Block self, Block parent) {
+	private static void registerParentAndItems(Block self, Block parent) {
 		self.requirements(parent.category, parent.requirements, unlockAll || parent.unlocked());
 		final AtomicReference<Cons<EventType.UnlockEvent>> ref = new AtomicReference<>(null);
 		final Cons<EventType.UnlockEvent> eventHandler = e -> {

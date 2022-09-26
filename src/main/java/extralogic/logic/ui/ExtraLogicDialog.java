@@ -29,7 +29,6 @@ import mindustry.gen.Tex;
 import mindustry.gen.Unit;
 import mindustry.graphics.Pal;
 import mindustry.logic.LCategory;
-import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.PrintI;
 import mindustry.logic.LStatements.InvalidStatement;
 import mindustry.logic.LogicDialog;
@@ -46,7 +45,7 @@ public class ExtraLogicDialog extends BaseDialog {
 
 	public ExtraLCanvas canvas;
 
-	Cons<String> consumer = s -> {
+	public Cons<String> consumer = s -> {
 	};
 
 	public boolean privileged;
@@ -263,7 +262,7 @@ public class ExtraLogicDialog extends BaseDialog {
 			}).fill().maxHeight(Core.graphics.getHeight() * 0.8f);
 			dialog.addCloseButton();
 			dialog.show();
-		}).disabled(t -> canvas.statements.getChildren().size >= LExecutor.maxInstructions);
+		});
 	}
 
 	public void show(String code, ExtraLExecutor executor, boolean privileged, Cons<String> modified) {

@@ -13,13 +13,16 @@ import java.util.zip.InflaterInputStream;
 import arc.Graphics.Cursor;
 import arc.Graphics.Cursor.SystemCursor;
 import arc.func.Cons;
+import arc.math.geom.Point2;
 import arc.scene.ui.layout.Table;
 import arc.struct.Bits;
 import arc.struct.IntSet;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.Strings;
 import arc.util.Structs;
+import arc.util.Tmp;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
 import extralogic.content.ExtraLogicContent;
@@ -36,19 +39,24 @@ import mindustry.graphics.Pal;
 import mindustry.io.TypeIO;
 import mindustry.io.TypeIO.BuildingBox;
 import mindustry.io.TypeIO.UnitBox;
-import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.Var;
 import mindustry.logic.Ranged;
 import mindustry.ui.Styles;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.ConstructBlock.ConstructBuild;
+import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.logic.LogicBlock.LogicBuild;
 import mindustry.world.meta.BlockGroup;
 import mindustry.world.meta.Env;
 import mindustry.world.meta.Stat;
 import mindustry.world.meta.StatUnit;
 
+/**
+ * From {@link LogicBlock}
+ * 
+ * @author DasBabyPixel
+ */
 public class ExtraLogicBlock extends Block {
 
 	public int instructionsPerTick;
@@ -113,15 +121,6 @@ public class ExtraLogicBlock extends Block {
 		return accessible();
 	}
 
-	@Override
-	public void setStats() {
-		super.setStats();
-		if (!privileged) {
-			stats.add(Stat.linkRange, range / 8, StatUnit.blocks);
-			stats.add(Stat.instructions, instructionsPerTick * 60, StatUnit.perSecond);
-		}
-	}
-
 	public static String getLinkName(Block block) {
 		String name = block.name;
 		if (name.contains("-")) {
@@ -171,6 +170,63 @@ public class ExtraLogicBlock extends Block {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void setStats() {
+		super.setStats();
+		if (!privileged) {
+			stats.add(Stat.linkRange, range / 8, StatUnit.blocks);
+			stats.add(Stat.instructions, instructionsPerTick * 60, StatUnit.perSecond);
+		}
+	}
+
+	@Override
+	public void drawPlace(int x, int y, int rotation, boolean valid) {
+		if (!this.privileged) {
+			Drawf.circles(x * 8 + this.offset, y * 8 + this.offset, this.range);
+		}
+	}
+
+	@Override
+	public Object pointConfig(Object config, Cons<Point2> transformer) {
+		if (config instanceof byte[] data) {
+
+			try (DataInputStream stream = new DataInputStream(
+					new InflaterInputStream(new ByteArrayInputStream(data)))) {
+				// discard version for now
+				stream.read();
+
+				int bytelen = stream.readInt();
+
+//				if (bytelen > maxByteLen)
+//					throw new RuntimeException("Malformed logic data! Length: " + bytelen);
+
+				byte[] bytes = new byte[bytelen];
+				stream.readFully(bytes);
+
+				int total = stream.readInt();
+
+				Seq<LogicLink> links = new Seq<>();
+
+				for (int i = 0; i < total; i++) {
+					String name = stream.readUTF();
+					short x = stream.readShort(), y = stream.readShort();
+
+					Tmp.p2.set((int) (offset / (tilesize / 2)), (int) (offset / (tilesize / 2)));
+					transformer.get(Tmp.p1.set(x * 2, y * 2).sub(Tmp.p2));
+					Tmp.p1.add(Tmp.p2);
+					Tmp.p1.x /= 2;
+					Tmp.p1.y /= 2;
+					links.add(new LogicLink(Tmp.p1.x, Tmp.p1.y, name, true));
+				}
+
+				return compress(bytes, links);
+			} catch (IOException e) {
+				Log.err(e);
+			}
+		}
+		return config;
 	}
 
 	public static class LogicLink {
@@ -572,8 +628,9 @@ public class ExtraLogicBlock extends Block {
 			}
 
 			table.button(Icon.pencil, Styles.cleari, () -> {
-				ExtraLogicContent.ui.dialog.show(code, executor, privileged,
-						code -> configure(compress(code, relativeConnections())));
+				ExtraLogicContent.ui.dialog.show(code, executor, privileged, code -> {
+					configure(compress(code, relativeConnections()));
+				});
 			}).size(40);
 		}
 
@@ -594,7 +651,7 @@ public class ExtraLogicBlock extends Block {
 
 		@Override
 		public byte version() {
-			return 2;
+			return 3;
 		}
 
 		@Override
@@ -606,8 +663,9 @@ public class ExtraLogicBlock extends Block {
 			write.b(compressed);
 
 			// write only the non-constant variables
-			int count = Structs.count(executor.vars, v -> (!v.handle.constant || v == executor.vars[LExecutor.varUnit])
-					&& !(v.handle.isobj && v.handle.objval == null));
+			int count = Structs.count(executor.vars,
+					v -> (!v.handle.constant || v == executor.vars[ExtraLExecutor.varUnit])
+							&& !(v.handle.isobj && v.handle.objval == null));
 
 			write.i(count);
 			for (int i = 0; i < executor.vars.length; i++) {
@@ -619,7 +677,7 @@ public class ExtraLogicBlock extends Block {
 					continue;
 
 				// skip constants
-				if (v.constant && i != LExecutor.varUnit)
+				if (v.constant && i != ExtraLExecutor.varUnit)
 					continue;
 
 				// write the name and the object value
@@ -678,7 +736,7 @@ public class ExtraLogicBlock extends Block {
 				for (int i = 0; i < varcount; i++) {
 					ExtraBVar dest = asm.getVar(names[i]);
 
-					if (dest != null && (!dest.constant || dest.id == LExecutor.varUnit)) {
+					if (dest != null && (!dest.constant || dest.id == ExtraLExecutor.varUnit)) {
 						dest.value = values[i] instanceof BuildingBox box ? box.unbox()
 								: values[i] instanceof UnitBox box ? box.unbox() : values[i];
 					}
