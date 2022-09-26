@@ -13,8 +13,10 @@ import extralogic.logic.ExtraLStatement;
 import extralogic.logic.WrapperExtraLInstruction;
 import mindustry.logic.ConditionOp;
 import mindustry.logic.LCategory;
+import mindustry.logic.LExecutor.EndI;
 import mindustry.logic.LExecutor.JumpI;
 import mindustry.logic.LStatements;
+import mindustry.logic.LStatements.EndStatement;
 import mindustry.logic.LStatements.JumpStatement;
 import mindustry.ui.Styles;
 
@@ -43,6 +45,32 @@ public class ExtraLStatements {
 			res.afterRead();
 			return res;
 		});
+		ExtraLAssembler.customParsers.put("end", tokens -> new ExtraEndStatement());
+
+	}
+
+	/**
+	 * From {@link EndStatement}
+	 * 
+	 * @author DasBabyPixel
+	 */
+	public static class ExtraEndStatement extends ExtraLStatement {
+
+		@Override
+		public void build(Table table) {
+
+		}
+
+		@Override
+		public ExtraLInstruction build(ExtraLAssembler builder) {
+			return new WrapperExtraLInstruction(new EndI());
+		}
+
+		@Override
+		public ExtraLCategory category() {
+			return ExtraLCategory.fromLCategory(LCategory.control);
+		}
+
 	}
 
 	/**
@@ -85,6 +113,19 @@ public class ExtraLStatements {
 				}
 			});
 
+		}
+
+		@Override
+		public void write(StringBuilder out) {
+			out.append("jump");
+			out.append(" ");
+			out.append(destIndex);
+			out.append(" ");
+			out.append(op.name());
+			out.append(" ");
+			out.append(value);
+			out.append(" ");
+			out.append(compare);
 		}
 
 		void rebuild(Table table) {

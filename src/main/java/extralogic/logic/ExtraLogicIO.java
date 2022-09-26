@@ -4,10 +4,12 @@ import arc.func.Prov;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import extralogic.logic.statements.ExtraLStatements;
+import extralogic.logic.statements.ExtraLStatements.ExtraEndStatement;
 import extralogic.logic.statements.ExtraLStatements.ExtraJumpStatement;
 import mindustry.gen.LogicIO;
 import mindustry.logic.LAssembler;
 import mindustry.logic.LStatement;
+import mindustry.logic.LStatements.EndStatement;
 import mindustry.logic.LStatements.JumpStatement;
 
 /**
@@ -65,12 +67,13 @@ public class ExtraLogicIO {
 	private static Seq<Prov<ExtraLStatement>> allStatements = null;
 
 	@SuppressWarnings("unchecked")
-	public static Seq<Prov<ExtraLStatement>> allExtraStatements = Seq
-			.<Prov<ExtraLStatement>>with(ExtraLStatements.ExtraJumpStatement::new);
+	public static Seq<Prov<ExtraLStatement>> allExtraStatements = Seq.<Prov<ExtraLStatement>>with(
+			ExtraLStatements.ExtraJumpStatement::new, ExtraLStatements.ExtraEndStatement::new);
 
 	public static ObjectMap<Class<? extends LStatement>, Class<? extends ExtraLStatement>> overrideVanillas = new ObjectMap<>();
 	static {
 		overrideVanillas.put(JumpStatement.class, ExtraJumpStatement.class);
+		overrideVanillas.put(EndStatement.class, ExtraEndStatement.class);
 	}
 
 }
