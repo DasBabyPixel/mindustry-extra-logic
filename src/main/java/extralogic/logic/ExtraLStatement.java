@@ -55,7 +55,11 @@ public abstract class ExtraLStatement {
 		// instructions can appear here anyway, and the instructions get validated on
 		// load anyway
 		Seq<ExtraLStatement> read = ExtraLAssembler.read(build.toString(), true);
-		return read.size == 0 ? null : read.first();
+		if (read.size == 0)
+			return null;
+		ExtraLStatement f = read.first();
+		f.name = name;
+		return f;
 	}
 
 	public boolean hidden() {

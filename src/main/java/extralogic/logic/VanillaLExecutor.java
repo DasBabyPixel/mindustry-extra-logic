@@ -48,6 +48,8 @@ public class VanillaLExecutor extends LExecutor {
 	@Override
 	public Var var(int index) {
 		ExtraVar ev = extra.var(index);
+		if (ev == null)
+			throw new NullPointerException("Variable at index " + index + " is null");
 		return ev.handle;
 	}
 

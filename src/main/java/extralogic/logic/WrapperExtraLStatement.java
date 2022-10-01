@@ -10,6 +10,7 @@ public class WrapperExtraLStatement extends ExtraLStatement {
 
 	public WrapperExtraLStatement(LStatement handle) {
 		this.handle = handle;
+		this.name = handle.name();
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import arc.scene.ui.layout.Table;
 import arc.scene.ui.layout.WidgetGroup;
 import arc.struct.Seq;
 import arc.util.Align;
+import arc.util.Log;
 import arc.util.Time;
 import arc.util.Tmp;
 import mindustry.Vars;
@@ -194,6 +195,7 @@ public class ExtraLCanvas extends Table {
 	}
 
 	public void add(ExtraLStatement statement) {
+		Log.info("Add " + statement.getClass().getSimpleName() + ": " + statement.name());
 		statements.addChild(new ExtraStatementElem(statement));
 	}
 

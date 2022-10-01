@@ -426,7 +426,6 @@ public class ExtraLogicBlock extends Block {
 					asm.putConst("@thisx", World.conv(x));
 					asm.putConst("@thisy", World.conv(y));
 
-					Log.info("Loading new code into ExtraLExecutor");
 					executor.load(asm);
 				} catch (Exception e) {
 					Log.info("Malformed logic code");

@@ -1,6 +1,7 @@
 package extralogic.logic.statements;
 
 import arc.Core;
+import arc.func.Func;
 import arc.graphics.Color;
 import arc.scene.ui.Label;
 import arc.scene.ui.layout.Table;
@@ -10,6 +11,7 @@ import extralogic.logic.ExtraLCanvas.ExtraStatementElem;
 import extralogic.logic.ExtraLCategory;
 import extralogic.logic.ExtraLExecutor.ExtraLInstruction;
 import extralogic.logic.ExtraLStatement;
+import extralogic.logic.ExtraLogicIO;
 import extralogic.logic.WrapperExtraLInstruction;
 import mindustry.logic.ConditionOp;
 import mindustry.logic.LCategory;
@@ -28,25 +30,8 @@ import mindustry.ui.Styles;
 public class ExtraLStatements {
 
 	public static void load() {
-		ExtraLAssembler.customParsers.put("jump", tokens -> {
-			ExtraJumpStatement res = new ExtraJumpStatement();
-			if (tokens.length > 1) {
-				res.destIndex = Integer.valueOf(tokens[1]);
-			}
-			if (tokens.length > 2) {
-				res.op = ConditionOp.valueOf(tokens[2]);
-			}
-			if (tokens.length > 3) {
-				res.value = tokens[3];
-			}
-			if (tokens.length > 4) {
-				res.compare = tokens[4];
-			}
-			res.afterRead();
-			return res;
-		});
-		ExtraLAssembler.customParsers.put("end", tokens -> new ExtraEndStatement());
-
+		ExtraLogicIO.overrideVanilla(JumpStatement.class, "jump", ExtraJumpStatement::new, ExtraJumpStatement.parser);
+		ExtraLogicIO.overrideVanilla(EndStatement.class, "end", ExtraEndStatement::new, ExtraEndStatement.parser);
 	}
 
 	/**
@@ -55,6 +40,8 @@ public class ExtraLStatements {
 	 * @author DasBabyPixel
 	 */
 	public static class ExtraEndStatement extends ExtraLStatement {
+
+		public static final Func<String[], ExtraEndStatement> parser = tokens -> new ExtraEndStatement();
 
 		@Override
 		public void build(Table table) {
@@ -79,6 +66,24 @@ public class ExtraLStatements {
 	 * @author DasBabyPixel
 	 */
 	public static class ExtraJumpStatement extends ExtraLStatement {
+
+		public static final Func<String[], ExtraJumpStatement> parser = tokens -> {
+			ExtraJumpStatement res = new ExtraJumpStatement();
+			if (tokens.length > 1) {
+				res.destIndex = Integer.valueOf(tokens[1]);
+			}
+			if (tokens.length > 2) {
+				res.op = ConditionOp.valueOf(tokens[2]);
+			}
+			if (tokens.length > 3) {
+				res.value = tokens[3];
+			}
+			if (tokens.length > 4) {
+				res.compare = tokens[4];
+			}
+			res.afterRead();
+			return res;
+		};
 
 		private static Color last = new Color();
 

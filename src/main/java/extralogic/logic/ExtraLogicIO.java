@@ -1,16 +1,13 @@
 package extralogic.logic;
 
+import arc.func.Func;
 import arc.func.Prov;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
-import extralogic.logic.statements.ExtraLStatements;
-import extralogic.logic.statements.ExtraLStatements.ExtraEndStatement;
-import extralogic.logic.statements.ExtraLStatements.ExtraJumpStatement;
+import arc.util.Log;
 import mindustry.gen.LogicIO;
 import mindustry.logic.LAssembler;
 import mindustry.logic.LStatement;
-import mindustry.logic.LStatements.EndStatement;
-import mindustry.logic.LStatements.JumpStatement;
 
 /**
  * From {@link LogicIO}
@@ -19,40 +16,62 @@ import mindustry.logic.LStatements.JumpStatement;
  */
 public class ExtraLogicIO {
 
+	private static Seq<Prov<ExtraLStatement>> allStatements = null;
+
+	@SuppressWarnings("unchecked")
+	private static Seq<Prov<ExtraLStatement>> allExtraStatements = Seq.<Prov<ExtraLStatement>>with();
+
+	private static ObjectMap<Class<? extends LStatement>, Overrider> overrideVanillas = new ObjectMap<>();
+
+	private static ObjectMap<String, Func<String[], ? extends ExtraLStatement>> customParsers = new ObjectMap<>();
+
 	public static Seq<Prov<ExtraLStatement>> allStatements() {
 		if (allStatements != null)
 			return allStatements;
-		ObjectMap<Class<? extends ExtraLStatement>, Class<? extends LStatement>> overridden = new ObjectMap<>();
-		ObjectMap<Class<? extends LStatement>, Prov<LStatement>> overriddenVanillaProvs = new ObjectMap<>();
+		regenerateStatements();
+		return allStatements;
+	}
+
+	public static void regenerateStatements() {
+		Log.warn("Generating ExtraLogic statements");
 		Seq<Prov<ExtraLStatement>> statements = new Seq<>();
+		ObjectMap<Class<? extends LStatement>, Overrider> toOverride = new ObjectMap<>(overrideVanillas);
 		for (Prov<LStatement> vanilla : LogicIO.allStatements) {
-			Class<? extends LStatement> cls = vanilla.get().getClass();
-			if (overrideVanillas.containsKey(cls)) {
-				overriddenVanillaProvs.put(cls, vanilla);
-				overridden.put(overrideVanillas.get(cls), cls);
-				continue;
-			}
-			statements.add(() -> new WrapperExtraLStatement(vanilla.get()));
-		}
-		for (Prov<ExtraLStatement> prov : allExtraStatements) {
-			Class<? extends ExtraLStatement> cls = prov.get().getClass();
-			if (overridden.containsKey(cls)) {
-				String name = overriddenVanillaProvs.get(overridden.get(cls)).get().name();
+			LStatement vanillas = vanilla.get();
+			Class<? extends LStatement> cls = vanillas.getClass();
+			if (toOverride.containsKey(cls)) {
+				String name = vanillas.name();
+				Overrider o = toOverride.remove(cls);
+				Func<String[], ? extends ExtraLStatement> parser = o.parser;
+				customParsers.put(o.instruction, tokens -> {
+					ExtraLStatement s = parser.get(tokens);
+					s.name = name;
+					return s;
+				});
+				Prov<? extends ExtraLStatement> prov = o.provider;
 				statements.add(() -> {
 					ExtraLStatement s = prov.get();
 					s.name = name;
 					return s;
 				});
+				Log.warn("Vanilla statement @ was overridden", cls.getSimpleName());
 				continue;
 			}
+			statements.add(() -> new WrapperExtraLStatement(vanilla.get()));
+		}
+		for (Prov<ExtraLStatement> prov : allExtraStatements) {
 			statements.add(prov);
 		}
-		return allStatements = statements;
+		for (Class<? extends LStatement> cls : toOverride.keys()) {
+			Log.err("Failed to override vanilla statement @", cls.getSimpleName());
+		}
+		allStatements = statements;
 	}
 
 	public static ExtraLStatement read(String[] tokens, int tok) {
-		if (ExtraLAssembler.customParsers.containsKey(tokens[0])) {
-			return ExtraLAssembler.customParsers.get(tokens[0]).get(tokens);
+		allStatements();
+		if (customParsers.containsKey(tokens[0])) {
+			return customParsers.get(tokens[0]).get(tokens);
 		}
 		LStatement vanilla = LogicIO.read(tokens, tok);
 		if (vanilla != null) {
@@ -64,16 +83,26 @@ public class ExtraLogicIO {
 		return null;
 	}
 
-	private static Seq<Prov<ExtraLStatement>> allStatements = null;
+	public static void overrideVanilla(Class<? extends LStatement> vanilla, String instruction,
+			Prov<? extends ExtraLStatement> provider, Func<String[], ? extends ExtraLStatement> parser) {
+		overrideVanillas.put(vanilla, new Overrider(instruction, provider, parser));
+	}
 
-	@SuppressWarnings("unchecked")
-	public static Seq<Prov<ExtraLStatement>> allExtraStatements = Seq.<Prov<ExtraLStatement>>with(
-			ExtraLStatements.ExtraJumpStatement::new, ExtraLStatements.ExtraEndStatement::new);
+	private static class Overrider {
 
-	public static ObjectMap<Class<? extends LStatement>, Class<? extends ExtraLStatement>> overrideVanillas = new ObjectMap<>();
-	static {
-		overrideVanillas.put(JumpStatement.class, ExtraJumpStatement.class);
-		overrideVanillas.put(EndStatement.class, ExtraEndStatement.class);
+		private String instruction;
+
+		private Prov<? extends ExtraLStatement> provider;
+
+		private Func<String[], ? extends ExtraLStatement> parser;
+
+		public Overrider(String instruction, Prov<? extends ExtraLStatement> provider,
+				Func<String[], ? extends ExtraLStatement> parser) {
+			this.instruction = instruction;
+			this.provider = provider;
+			this.parser = parser;
+		}
+
 	}
 
 }

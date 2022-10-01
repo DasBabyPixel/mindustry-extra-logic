@@ -1,6 +1,5 @@
 package extralogic.logic;
 
-import arc.func.Func;
 import arc.graphics.Color;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
@@ -18,8 +17,6 @@ import mindustry.logic.LAssembler.BVar;
  * @author DasBabyPixel
  */
 public class ExtraLAssembler {
-
-	public static ObjectMap<String, Func<String[], ExtraLStatement>> customParsers = new ObjectMap<>();
 
 	public static final int maxTokenLength = 36;
 
@@ -45,7 +42,7 @@ public class ExtraLAssembler {
 	}
 
 	public VanillaLAssembler vanillaClone() {
-		if(vanillaClone==null) {
+		if (vanillaClone == null) {
 			vanillaClone = new VanillaLAssembler(this);
 		}
 		return vanillaClone;
@@ -158,31 +155,10 @@ public class ExtraLAssembler {
 	}
 
 	/** A variable "builder". */
-	public static class ExtraBVar {
-
-		public int id;
-
-		public boolean constant;
-
-		public Object value;
+	public static class ExtraBVar extends BVar {
 
 		public ExtraBVar(int id) {
-			this.id = id;
-		}
-
-		ExtraBVar() {
-		}
-
-		public BVar vanillaClone() {
-			BVar bv = new BVar(id);
-			bv.constant = constant;
-			bv.value = value;
-			return bv;
-		}
-
-		@Override
-		public String toString() {
-			return "BVar{" + "id=" + id + ", constant=" + constant + ", value=" + value + '}';
+			super(id);
 		}
 
 	}

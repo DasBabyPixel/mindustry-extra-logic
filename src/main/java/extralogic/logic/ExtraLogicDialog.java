@@ -297,19 +297,26 @@ public class ExtraLogicDialog extends BaseDialog {
 		}).disabled(b -> compactView());
 		buttons.button("@clear", () -> {
 			BaseDialog dialog = new BaseDialog("Confirmation");
-			dialog.cont.add("You are about to clear all contents of this processor. Are you sure?");
-			dialog.cont.button("Yes", () -> {
-				try {
-					canvas.load("");
-				} catch (Throwable ex) {
-					ui.showException(ex);
+			dialog.cont.add("You are about to clear all contents of this processor. Are you sure?").row();
+			dialog.cont.add(new Table() {
+
+				{
+					buttons.defaults().size(160f, 64f);
+					button("Yes", () -> {
+						try {
+							canvas.load("");
+						} catch (Throwable ex) {
+							ui.showException(ex);
+						}
+						dialog.hide();
+					}).size(200, 50);
+					button("No", () -> {
+						dialog.hide();
+					}).size(200, 50);
+					dialog.show();
 				}
-				dialog.hide();
-			}).size(200, 50);
-			dialog.cont.button("No", () -> {
-				dialog.hide();
-			}).size(200, 50);
-			dialog.show();
+
+			}).row();
 		}).name("clear").disabled(t -> canvas.statements.seq.size == 0);
 	}
 

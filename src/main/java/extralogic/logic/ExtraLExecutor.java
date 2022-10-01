@@ -21,7 +21,6 @@ public class ExtraLExecutor {
 
 //	--- Removed instruction cap ---
 //	public static final int maxInstructions = 1000;
-
 	// special variables
 	public static final int varCounter = 0, varUnit = 1, varThis = 2;
 
@@ -50,6 +49,8 @@ public class ExtraLExecutor {
 	public Team team = Team.derelict;
 
 	public boolean privileged = false;
+	
+	public VanillaLExecutor vanilla;
 
 	public boolean initialized() {
 		return instructions.length > 0;
@@ -92,6 +93,7 @@ public class ExtraLExecutor {
 		});
 
 		counter = vars[varCounter];
+		vanilla = new VanillaLExecutor(this);
 	}
 
 	// region utility
@@ -139,7 +141,8 @@ public class ExtraLExecutor {
 
 	public float numf(int index) {
 		ExtraVar v = var(index);
-		return v.handle.isobj ? v.handle.objval != null ? 1 : 0 : invalid(v.handle.numval) ? 0 : (float) v.handle.numval;
+		return v.handle.isobj ? v.handle.objval != null ? 1 : 0
+				: invalid(v.handle.numval) ? 0 : (float) v.handle.numval;
 	}
 
 	public int numi(int index) {

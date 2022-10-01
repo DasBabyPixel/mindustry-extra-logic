@@ -164,21 +164,16 @@ public class ExtraLParser {
 
 				// store jumps that use labels
 //				if (st instanceof JumpStatement jump && wasJump) {
-				if (st instanceof WrapperExtraLStatement
-						&& ((WrapperExtraLStatement) st).handle instanceof JumpStatement jump && wasJump) {
+				if (st instanceof WrapperExtraLStatement hst && hst.handle instanceof JumpStatement jump && wasJump) {
+					Thread.dumpStack();
 					jumps.add(new JumpIndex(jump, jumpLoc));
 				}
 
 				if (st != null) {
 					statements.add(st);
 				} else {
-					// attempt parsing using custom parser if a match is found; this is for mods
-					if (ExtraLAssembler.customParsers.containsKey(tokens[0])) {
-						statements.add(ExtraLAssembler.customParsers.get(tokens[0]).get(tokens));
-					} else {
-						// unparseable statement
-						statements.add(new WrapperExtraLStatement(new InvalidStatement()));
-					}
+					// unparseable statement
+					statements.add(new WrapperExtraLStatement(new InvalidStatement()));
 				}
 				line++;
 			}
